@@ -56,6 +56,7 @@
 
         <h2>Product Information</h2>
         <table id="productsTable">
+        <thead>
             <tr>
                 <th>Product Name</th>
                 <th>Product Price</th>
@@ -63,93 +64,86 @@
                 <th>Product Type</th>
                 <th>Discount</th>
             </tr>
+        </thead>
+        <tbody>
+            <!-- Initial row -->
             <tr>
-                <td><input type="text" class="form-control"  name="product_name[]" required></td>
-                <td><input type="number" class="form-control"  name="product_price[]" required></td>
-                <td><input type="number" class="form-control"  name="product_quantity[]" required></td>
+                <td><input type="text" name="product_name[]" required></td>
+                <td><input type="number" name="product_price[]" onkeyup="calculateTotalAmount()" required></td>
+                <td><input type="number" name="product_quantity[]" onkeyup="calculateTotalAmount()" required></td>
                 <td>
-                    <select class="form-control"  name="product_type[]" onchange="toggleDiscount(this)">
+                    <select name="product_type[]" onchange="toggleDiscount(this)">
+                        <option value="">Select Product Type</option>
                         <option value="flat">Flat</option>
                         <option value="discount">Discount</option>
                     </select>
                 </td>
-                <td><input type="text" class="form-control"  name="discount[]" readonly></td>
+                <td><input type="text" name="discount[]" onkeyup="calculateTotalAmount()" readonly></td>
             </tr>
-        </table>
+        </tbody>
+    </table>
 
         <button type="button" onclick="addRow()">Add</button>
 
         <h2>Total Amount</h2>
-        <input type="text" class="form-control" id="totalAmount" readonly>
+        <input type="text" class="form-control" id="totalAmount" name="totalAmount" readonly>
 
-        <button type="submit">Submit</button>
-        <a href="{{url('/')}}">Cancel</a>
+        <button type="submit" class="btn btn-success" >Submit</button>
+        <a href="{{url('/')}}" class="btn btn-danger">Cancel</a>
     </form>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    <script>
-     function calculateTotalAmount() {
-    const productsTable = document.getElementById("productsTable");
-    const rows = productsTable.querySelectorAll("input[name='product_price[]']");
-    const quantities = productsTable.querySelectorAll("input[name='product_quantity[]']");
-    const discounts = productsTable.querySelectorAll("input[name='discount[]']");
-    const totalAmount = 0;
+   
 
-    for (let i = 0; i < rows.length; i++) {
-        const price = parseFloat(rows[i].value);
-        const quantity = parseInt(quantities[i].value);
-        const discount = parseFloat(discounts[i].value);
-
-        if (discount === 0) {
-            totalAmount += price * quantity;
-        } else {
-            totalAmount += price * quantity * (1 - discount / 100);
-        }
-    }
-
-    document.getElementById("totalAmount").value = totalAmount;
-}
-
-// Add an event listener to the quantity and price inputs to trigger the calculation
-rows.forEach(row => row.addEventListener("change", calculateTotalAmount));
-quantities.forEach(quantity => quantity.addEventListener("change", calculateTotalAmount));
-
-
-    function toggleDiscount(selectElement) {
-        const discountInput = selectElement.parentElement.nextElementSibling.querySelector('input[name="discount[]"]');
-        if (selectElement.value === "discount") {
-            discountInput.removeAttribute("readonly");
-        } else {
-            discountInput.setAttribute("readonly", true);
-            discountInput.value = '';
+<script>
+        function toggleDiscount(selectElement) {
+            const discountInput = selectElement.parentElement.nextElementSibling.querySelector('input[name="discount[]"]');
+            discountInput.readOnly = (selectElement.value === "flat");
+            discountInput.value = (selectElement.value === "flat") ? "0" : "";
+            calculateTotalAmount();
         }
 
-        calculateTotalAmount(); // Recalculate total amount after changing the discount option.
-    }
+        function addRow() {
+            const table = document.getElementById("productsTable").getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow(table.rows.length);
 
-    function addRow() {
-        const table = document.getElementById("productsTable");
-        const newRow = table.insertRow(table.rows.length - 1);
-        const columns = ["product_name", "product_price", "product_quantity", "product_type", "discount"];
+            const columns = ["product_name", "product_price", "product_quantity", "product_type", "discount"];
 
-        for (let i = 0; i < columns.length; i++) {
-            const cell = newRow.insertCell(i);
-            if (columns[i] === "product_type") {
-                cell.innerHTML = `
-                    <select class="form-control" name="${columns[i]}[]" onchange="toggleDiscount(this)">
-                        <option value="flat">Flat</option>
-                        <option value="discount">Discount</option>
-                    </select>`;
-            } else if (columns[i] === "discount") {
-                cell.innerHTML = `<input type="text" class="form-control" name="${columns[i]}[]" readonly>`;
-            } else {
-                cell.innerHTML = `<input type="text" class="form-control" name="${columns[i]}[]" required>`;
+            for (let i = 0; i < columns.length; i++) {
+                const cell = newRow.insertCell(i);
+                if (columns[i] === "product_type") {
+                    cell.innerHTML = `
+                        <select name="${columns[i]}[]" onchange="toggleDiscount(this)">
+                            <option value="">Select Product Type</option>
+                            <option value="flat">Flat</option>
+                            <option value="discount">Discount</option>
+                        </select>`;
+                } else if (columns[i] === "discount") {
+                    cell.innerHTML = `<input type="text" name="${columns[i]}[]" onkeyup="calculateTotalAmount()" readonly>`;
+                } else {
+                    cell.innerHTML = `<input type="text" name="${columns[i]}[]" onkeyup="calculateTotalAmount()" required>`;
+                }
             }
         }
-    }
+
+        function calculateTotalAmount() {
+            const rows = document.querySelectorAll("#productsTable tbody tr");
+            let totalAmount = 0;
+
+            rows.forEach(row => {
+                const price = parseFloat(row.querySelector("input[name='product_price[]']").value) || 0;
+                const quantity = parseFloat(row.querySelector("input[name='product_quantity[]']").value) || 0;
+                const discount = parseFloat(row.querySelector("input[name='discount[]']").value) || 0;
+
+                const subTotal = price * quantity;
+                totalAmount += discount ? (subTotal - discount) : subTotal;
+            });
+
+            document.getElementById("totalAmount").value = totalAmount.toFixed(2);
+        }
     </script>
 </body>
 </html>

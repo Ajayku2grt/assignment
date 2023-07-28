@@ -10,7 +10,7 @@
     <div class="container">
     <div class="container">
         <h2>Product List</h2>
-        <a href="{{url('add-form')}}">Add Product</a>
+        <a href="{{url('add-form')}}" class="btn btn-info">Add Product</a>
     </div>
         <div class="card-body card-filter flex-container farmer-filter px-0">
                     <form class="row gx-3 gy-2 align-items-center form-filter">
